@@ -1,0 +1,11 @@
+# Byte-compiled
+.__psycache__/
+*.pyc
+__pycache__/
+
+# Environment files
+.env
+
+# IDE Files
+.vscode/
+
