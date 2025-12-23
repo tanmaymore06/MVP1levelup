@@ -14,7 +14,6 @@
 ## Entity-Relationship Model
 <figure> 
 <img src="Database Schema of the Level Up (the 1st MVP).jpeg">
-    <p>There is just one change which is not in the above given image, and the change is that, in the MainQuest table there is also a "description" field which is of the TextField() data type. </p>
 </figure>
 
 ## Relationship Explanations
