@@ -325,7 +325,7 @@ Any violation indicates a logic error.
 
 # Derived State Functions
 
-<h3>1. Getting Concept Nodes Completed By The User - <I>get_completed_nodes(user)</I></h3>  
+### 1. Which ConceptNodes are Completed By The User ? [<I>get_completed_nodes(user)</I>]  
 
 A ConceptNode is considered "completed" for a user if and only if
 there exists a UserNodeProgress entry for that (user, concept_node) pair.
@@ -347,3 +347,31 @@ there exists a UserNodeProgress entry for that (user, concept_node) pair.
     - works, even with empty databases
     - returns an empty queryset for new users
     - is used as the foundation for all progression rules
+
+### 2. What is the user's current MainQuest ?[get_current_main_quest(user)]
+
+Answers <B>one precise question:</B>
+
+    Among all published MainQuests, which one is the user currently progressing through?
+
+By definition, this is:
+
+<B>The first published MainQuest (by order) that is NOT fully completed by the user.</B>
+
+If none exists → return "All Published MainQuests are completed OR, other MainQuests are not yet been Published".
+
+#### Step-by-Step Logical Breakdown 
+
+For a given user:
+
+- Get all published MainQuests, ordered
+
+- For each MainQuest:
+
+    - Count how many ConceptNodes it has
+
+    - Count how many of those the user has completed
+
+The first MainQuest where, <B>completed < total</B> is the current MainQuest
+
+If all published MainQuests are completed → return "All Published MainQuests are completed OR, other MainQuests are not yet been Published".
