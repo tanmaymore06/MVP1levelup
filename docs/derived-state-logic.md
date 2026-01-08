@@ -348,6 +348,8 @@ there exists a UserNodeProgress entry for that (user, concept_node) pair.
     - returns an empty queryset for new users
     - is used as the foundation for all progression rules
 
+-------------------------------------------------
+
 ### 2. What is the user's current MainQuest ?[get_current_main_quest(user)]
 
 Answers <B>one precise question:</B>
@@ -375,3 +377,125 @@ For a given user:
 The first MainQuest where, <B>completed < total</B> is the current MainQuest
 
 If all published MainQuests are completed → return "All Published MainQuests are completed OR, other MainQuests are not yet been Published".
+
+-------------------------------------------------------
+
+### 3. Which ConceptNode is Pending For the User ? [get_pending_node(user)]
+<br>
+
+#### Purpose:
+To determine exactly one actionable ConceptNode that the user should work on next, ensuring strict progression through MainQuests and their ConceptNodes.
+
+#### Definition:
+
+get_pending_concept_node(user) returns the first incomplete ConceptNode, ordered by dependency (order), belonging to the user’s current published MainQuest.
+
+#### How the “Current MainQuest” Is Determined ?
+
+- The current MainQuest is defined as:
+
+    - The first published MainQuest (ordered globally by order)
+    - That is not fully completed by the user
+
+- A MainQuest is considered fully completed if the user has completed all of its ConceptNodes.
+
+#### Detailed Behavior:
+
+1. All published MainQuests are considered, ordered by progression.
+
+2. The system identifies the current MainQuest as the first published MainQuest that the user has not fully completed.
+
+3. Within this MainQuest:
+All ConceptNodes are ordered by their dependency order.
+The function selects the first ConceptNode that the user has not completed.
+
+4. That ConceptNode is returned as the pending ConceptNode.
+
+#### Return Value:
+
+- Returns a ConceptNode instance if progression is possible.
+
+- Returns "None" only if the user has completed all ConceptNodes in all published MainQuests.
+
+#### Invariants (Always True):
+
+- At most one pending ConceptNode exists per user.
+
+- If a pending ConceptNode exists, it is always:
+
+- Visible
+
+    - Actionable
+
+    - The least dependent incomplete ConceptNode
+
+- Pending ConceptNode automatically advances when the user completes it.
+
+#### Applying all the Previous Derived-state Functions on Dummy Data
+
+##### - Current State of the Dummy Data:
+    - In total, there are three users, "user1 = test1", "user2 = Tanmay", and "user3 = test3".
+
+    - There are total of three MainQuests, and their respective titles are:
+        - "MQ1", "MQ2", and "MQ3".
+
+    - The MQ1 has three ConceptNode, and their respective titles are:
+        - "MQ1_CN1", "MQ1_CN2", and "MQ1_CN3".
+        - This MainQuest is published.
+
+    - The MQ2 has two ConceptNode, and their respective titles are:
+        - "MQ2_CN1" and "MQ2_CN2".
+        - This MainQuest is also published.
+
+    - The MQ3 has only one ConceptNode, and it's title is:
+        - "MQ3_CN1".
+        - This MainQuest is not published.
+
+    - The MQ1_CN1 has two ConceptNodePage, and their respective titles are:
+        - "MQ1_CN1_CP1", and "MQ1_CN1_CP2".
+
+    - The MQ1_CN2 has four ConceptNodePage, and their respective titles are:
+        - "MQ1_CN2_CP1", "MQ1_CN2_CP2", "MQ1_CN2_CP3", and "MQ1_CN2_CP4".
+
+    - The MQ1_CN3 has three ConceptNodePage, and their respective titles are:
+        - "MQ1_CN3_CP1", "MQ1_CN3_CP2", and "MQ1_CN3_CP3".
+
+    - The MQ2_CN1 has two ConceptNodePage, anad their respective titles are:
+        - "MQ2_CN1_CP1", and "MQ2_CN1_CP2".
+
+    - The MQ2_CN2 has three ConceptNodePage, anad their respective titles are:
+        - "MQ2_CN2_CP1", "MQ2_CN2_CP2", and "MQ2_CN2_CP3".
+
+    - The MQ3_CN1 has only one ConceptNodepage, and it's title is:
+        - "MQ3_CN1_CP1".
+
+    - The "test1" has completed only the MQ1_CN1, the "Tanmay" has completed all the ConceptNode of the MQ1, and the "test3" has completed all ConceptNodes of all the Published MainQuests. 
+<br>
+
+- <b>For the "user1 = test1":</b>
+    - the "get_completed_nodes(user1)" returns:
+        - "<QuerySet [<ConceptNode: MQTitle: MQ1 CNTitle: MQ1_CN1 CNOrder: 1>]>"
+    - the "get_current_main_quest(user1)" returns:
+        - <MainQuest: MQTitle: MQ1 MQDesc: This is the 1st MainQuest.>
+    - the "get_pending_node(user1)" returns:
+        - <ConceptNode: MQTitle: MQ1 CNTitle: MQ1_CN2 CNOrder: 2>
+<br>
+- <b>For the "user2 = Tanmay":</b>
+    - the "get_completed_nodes(user2)" returns:
+        - <QuerySet [<ConceptNode: MQTitle: MQ1 CNTitle:    MQ1_CN1 CNOrder: 1>, <ConceptNode: MQTitle: MQ1 CNTitle: MQ1_CN2 CNOrder: 2>, <ConceptNode: MQTitle: MQ1 CNTitle: MQ1_CN3 CNOrder: 3>]>
+    - the "get_current_main_quest(user2)" returns:
+        - <MainQuest: MQTitle: MQ2 MQDesc: This is the 2nd MainQuest.>
+    - the "get_pending_node(user2)" returns:
+        - <ConceptNode: MQTitle: MQ2 CNTitle: MQ2_CN1 CNOrder: 1>    
+    <br>
+- <b>For the "user3 = test3":</b>
+    - the "get_completed_nodes(user2)" returns:
+        - <QuerySet [<ConceptNode: MQTitle: MQ1 CNTitle: MQ1_CN1 CNOrder: 1>, <ConceptNode: MQTitle: MQ2 CNTitle: MQ2_CN1 CNOrder: 1>, <ConceptNode: MQTitle: MQ3 CNTitle: MQ3_CN1 CNOrder: 1>, <ConceptNode: MQTitle: MQ1 CNTitle: MQ1_CN2 CNOrder: 2>, <ConceptNode: MQTitle: MQ2 CNTitle: MQ2_CN2 CNOrder: 2>, <ConceptNode: MQTitle: MQ1 CNTitle: MQ1_CN3 CNOrder: 3>]>
+    - the "get_current_main_quest(user2)" returns:
+        - None
+    - the "get_pending_node(user2)" returns:
+        - None
+<br>
+- <b>Hence, all the previuos derived-state functions are behaving as expected.</b>
+
+

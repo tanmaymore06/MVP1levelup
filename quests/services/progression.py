@@ -45,7 +45,23 @@ def get_current_main_quest(user):
         if completed_nodes_in_quest < total_nodes:
             return main_quest
         
-    return "All Published MainQuests are completed !!! OR, other MainQuests are not yet been Published."
+    return None
 
 
-        
+def get_pending_node(user):
+    """
+    In the current MainQuest, the first ConceptNode(by order) which is not 
+    completed by the user. 
+    """
+    current_quest = get_current_main_quest(user)
+    if current_quest is None:
+        return None 
+    
+    current_quest_nodes = current_quest.concept_nodes.order_by("order")
+
+    completed_nodes = get_completed_nodes(user)
+
+    for node in current_quest_nodes:
+        if node not in completed_nodes:
+            return node
+    return None
