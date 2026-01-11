@@ -349,6 +349,7 @@ there exists a UserNodeProgress entry for that (user, concept_node) pair.
     - is used as the foundation for all progression rules
 
 -------------------------------------------------
+<br>
 
 ### 2. What is the user's current MainQuest ?[get_current_main_quest(user)]
 
@@ -379,9 +380,10 @@ The first MainQuest where, <B>completed < total</B> is the current MainQuest
 If all published MainQuests are completed → return "All Published MainQuests are completed OR, other MainQuests are not yet been Published".
 
 -------------------------------------------------------
+<br>
 
 ### 3. Which ConceptNode is Pending For the User ? [get_pending_node(user)]
-<br>
+
 
 #### Purpose:
 To determine exactly one actionable ConceptNode that the user should work on next, ensuring strict progression through MainQuests and their ConceptNodes.
@@ -497,5 +499,131 @@ The function selects the first ConceptNode that the user has not completed.
         - None
 <br>
 - <b>Hence, all the previuos derived-state functions are behaving as expected.</b>
+-------------------------------------------------------------
+<br>
 
+## ----------Visibility Functions
+### 4. Which MainQuests are Visible to the User at any Point in Time ? [get_visible_main_quests(user)] 
 
+#### Definition
+
+A MainQuest is visible to the user if and only if:
+
+<b>The MainQuest is published, 
+AND
+The MainQuest is either:
+        
+    the user’s current MainQuest, or
+    a previously completed MainQuest
+
+Future MainQuests (even if published) are not visible.</b>
+
+### Detailed Behaviour
+1. All published MainQuests are considered, ordered by global progression order.
+
+2. The system determines the user’s current MainQuest as:
+
+    - the first published MainQuest that is not fully completed by the user.
+
+3. Visibility is derived as follows:
+
+    - If a current MainQuest exists:
+
+        - All published MainQuests up to and including the current MainQuest are visible.
+
+    - If no current MainQuest exists:
+
+        - The user has completed all published MainQuests.
+        - All published MainQuests are visible.
+
+#### Return Value
+
+- Returns an ordered QuerySet of MainQuest objects.
+
+- Returns an empty QuerySet only if no MainQuests are published.
+<br>
+
+### 5. Given a MainQuest, Which ConceptNodes are visible to the User ? [get_visible_nodes(user, main_quest)]
+
+#### Definition
+
+A ConceptNode is visible to a user if and only if its parent MainQuest is visible to the user.
+
+#### Detailed Behavior
+
+1. The system determines all visible MainQuests for the user.
+
+2. If the given MainQuest is not visible:
+
+    - No ConceptNodes from that MainQuest are visible.
+
+3. If the given MainQuest is visible:
+
+    - All ConceptNodes belonging to that MainQuest are visible.
+
+    - ConceptNodes are ordered by their dependency order.
+
+#### Return Value
+
+- Returns an ordered QuerySet of ConceptNode objects.
+
+- Returns an empty QuerySet if the MainQuest is not visible to the user.
+
+### Applying The Two Visibilty Functions On The Dummy Data
+
+#### State of the Dummy Data:
+- It is same as described in the third function.
+
+#### get_visible_main_quests(user)
+
+- For the <b>"user = user1 = test1"</b>:
+"""
+<QuerySet [<MainQuest: MQTitle: MQ1 MQDesc: This is the 1st MainQuest.>]>
+"""
+- For the <b>"user = user2 = Tanmay"</b>:
+"""
+<QuerySet [<MainQuest: MQTitle: MQ1 MQDesc: This is the 1st MainQuest.>, <MainQuest: MQTitle: MQ2 MQDesc: This is the 2nd MainQuest.>]>
+"""
+- For the <b>"user = user3 = test3"</b>:
+"""
+<QuerySet [<MainQuest: MQTitle: MQ1 MQDesc: This is the 1st MainQuest.>, <MainQuest: MQTitle: MQ2 MQDesc: This is the 2nd MainQuest.>]>
+"""
+
+#### get_visible_nodes(user, main_quest)
+
+- For the <b>"user = user1 = test1" and "main_quest = mq1" </b>:
+"""
+<QuerySet [<ConceptNode: MQTitle: MQ1 CNTitle: MQ1_CN1 CNOrder: 1>, <ConceptNode: MQTitle: MQ1 CNTitle: MQ1_CN2 CNOrder: 2>, <ConceptNode: MQTitle: MQ1 CNTitle: MQ1_CN3 CNOrder: 3>]>
+"""
+- For the <b>"main_quest = mq2"</b>:
+"""
+"""
+- For the <b>"main_quest = mq3"</b>:
+"""
+"""
+
+- For the <b>"user = user2 = Tanmay" and "main_quest = mq1" </b>:
+"""
+<QuerySet [<ConceptNode: MQTitle: MQ1 CNTitle: MQ1_CN1 CNOrder: 1>, <ConceptNode: MQTitle: MQ1 CNTitle: MQ1_CN2 CNOrder: 2>, <ConceptNode: MQTitle: MQ1 CNTitle: MQ1_CN3 CNOrder: 3>]>
+"""
+- For the <b>"main_quest = mq2"</b>:
+"""
+<QuerySet [<ConceptNode: MQTitle: MQ2 CNTitle: MQ2_CN1 CNOrder: 1>, <ConceptNode: MQTitle: MQ2 CNTitle: MQ2_CN2 CNOrder: 2>]>
+"""
+- For the <b>"main_quest = mq3"</b>:
+"""
+"""
+
+- For the <b>"user = user3 = test3" and "main_quest = mq1" </b>:
+"""
+<QuerySet [<ConceptNode: MQTitle: MQ1 CNTitle: MQ1_CN1 CNOrder: 1>, <ConceptNode: MQTitle: MQ1 CNTitle: MQ1_CN2 CNOrder: 2>, <ConceptNode: MQTitle: MQ1 CNTitle: MQ1_CN3 CNOrder: 3>]>\
+"""
+- For the <b>"main_quest = mq2"</b>:
+"""
+<QuerySet [<ConceptNode: MQTitle: MQ2 CNTitle: MQ2_CN1 CNOrder: 1>, <ConceptNode: MQTitle: MQ2 CNTitle: MQ2_CN2 CNOrder: 2>]>
+"""
+- For the <b>"main_quest = mq3"</b>:
+"""
+"""
+
+<b>Hence, the two Visibility Functions are working as expected.</b>

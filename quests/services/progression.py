@@ -65,3 +65,53 @@ def get_pending_node(user):
         if node not in completed_nodes:
             return node
     return None
+
+def get_visible_main_quests(user):
+    """
+    Returns a list of published MainQuests that are visible to the user,
+    ordered by progression.
+    A MainQuest is considered visible to the user if and only if:
+    1) It is Published, 
+    AND
+    2) It is either, the current MainQuest OR the previously completed MainQuest.
+    """
+    published_quests = MainQuest.objects.filter(
+        is_published=True
+    ).order_by("order")
+
+    completed_nodes = get_completed_nodes(user)
+
+    visible_ids = []
+
+    for mq in published_quests:
+        total_nodes = mq.concept_nodes.count()
+        completed_in_mq = completed_nodes.filter(
+            main_quest=mq
+        ).count()
+
+        visible_ids.append(mq.id)
+
+        if completed_in_mq < total_nodes:
+            break  # stop at current main quest
+
+    return MainQuest.objects.filter(id__in=visible_ids).order_by("order")
+
+
+def get_visible_nodes(user, main_quest):
+    """ 
+    Def: A ConceptNode is visible to the user if and only if 
+    it's parent MainQuest is visible to that user.
+
+    Returns a list of ConceptNodes within the given MainQuest that are visible to the user,
+    ordered by 'order'.
+    """
+    visible_main_quests = get_visible_main_quests(user)
+
+    if main_quest not in visible_main_quests:
+        return []
+    return ConceptNode.objects.filter(
+        main_quest=main_quest
+    ).order_by("order")
+
+
+
