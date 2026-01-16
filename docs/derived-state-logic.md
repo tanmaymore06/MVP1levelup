@@ -462,11 +462,11 @@ The function selects the first ConceptNode that the user has not completed.
     - The MQ1_CN3 has three ConceptNodePage, and their respective titles are:
         - "MQ1_CN3_CP1", "MQ1_CN3_CP2", and "MQ1_CN3_CP3".
 
-    - The MQ2_CN1 has two ConceptNodePage, anad their respective titles are:
-        - "MQ2_CN1_CP1", and "MQ2_CN1_CP2".
+    - The MQ2_CN1 has three ConceptNodePage, anad their respective titles are:
+        - "MQ2_CN1_CP1", "MQ2_CN1_CP2", and "MQ2_CN1_CP3.
 
-    - The MQ2_CN2 has three ConceptNodePage, anad their respective titles are:
-        - "MQ2_CN2_CP1", "MQ2_CN2_CP2", and "MQ2_CN2_CP3".
+    - The MQ2_CN2 has two ConceptNodePage, anad their respective titles are:
+        - "MQ2_CN2_CP1", and "MQ2_CN2_CP2".
 
     - The MQ3_CN1 has only one ConceptNodepage, and it's title is:
         - "MQ3_CN1_CP1".
