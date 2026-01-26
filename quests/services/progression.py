@@ -114,4 +114,13 @@ def get_visible_nodes(user, main_quest):
     ).order_by("order")
 
 
+# Now its time to make functions for the "Focus pool", the "Reinforcement pool", and the "Session".
 
+def get_focus_pool(user):
+    """ 
+    Return the single visible ConceptNode that the user should focus on right now.
+    Def: The Focus Pool contains exactly one ConceptNode:-
+        the pending ConceptNode of the user.
+    Returns None if there is no pending ConceptNode.
+    """
+    return get_pending_node(user)

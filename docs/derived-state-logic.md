@@ -121,7 +121,7 @@ For a given user, a published MainQuest can be in exactly one of the following d
 
 -------------------------------------------------------
 
-### 3.2.2 Current/Actice MainQuest
+### 3.2.2 Current/Active MainQuest
 
 - not fully completed
 
@@ -210,7 +210,7 @@ This ensures:
 
 -----------------------------------------------------
 
-# 6. Daily Quest 
+# 6. Session (Earlier "Daily Quest")  
 
 It’s a learning orchestration mechanism, which is different, and unique than the Daily Quests found in the other learning platforms.
 
@@ -222,14 +222,17 @@ It consists of two Pools:
 
 ## 6.1 Focus Pool (Structured Learning)
 
-<B>Definition</B>
+<B>Earlier Definition</B>
 An ordered list of ConceptNodes consisting of:
 
     1. The pending node (least dependent)
 
     2. The next consecutive nodes in the current MainQuest
 
-<B>Rules</B>
+##### <B>Updated and Current Definition
+Now the Focus Pool must contain only one ConceptNode, which is the pending of the user. WHY?</B> Because, one should not learn many new things in a single day, otherwise the person would not be able to grasp one new thing, fully.
+
+<B>Earlier Rules</B>
 
 - Ordered from least → most dependent
 
@@ -242,6 +245,13 @@ An ordered list of ConceptNodes consisting of:
     - unlock the next node
 
     - change tomorrow’s Focus Pool
+
+##### <B>Updated and Current Rules</B>
+
+- As the Focus Pool only has one ConceptNode which is the user's Pending ConceptNode, it returns pending ConceptNode of the user otherwise 'None' if, no pending ConceptNode of the user exists.
+- Size of the Focus Pool will always be one ConceptNode i.e., the Pending ConceptNode. No need of the completion ratio to determine size.
+- The pending node link to written explanation (Markdown)
+- Completing only the Focus Pool i.e, the pending node will not update the Session, as the Session needs the user to complete both, the Focus Pool and the Reinforcement Pool.
 
 <B>Purpose</B>
 
@@ -266,8 +276,9 @@ A list of ConceptNodes:
 
 - Never includes non-visible nodes
 
-- Size also depends on completion ratio
-
+- Size of the Reinforcement Pool will always be four.
+- Size of the Reinforcement Poo is static.
+    - <B>[Earlier]</B> Size also depends on completion ratio
 - Links to written explanations
 
 <b>Purpose</B>
@@ -280,27 +291,40 @@ A list of ConceptNodes:
 
 -------------------------------------------------------
 
-# 7. Daily Quest Lifecycle
+# 7. Session Lifecycle (Earlier "Daily Quest Lifecycle")
 
-<B>If Daily Quest is completed:</B>
+#### <B>Earlier -</B>
+    If Daily Quest is completed:
 
-- Streak increments by 1
+        - Streak increments by 1
 
-- Tomorrow’s Daily Quest is newly generated
+        - Tomorrow’s Daily Quest is newly generated
 
-<B>If Daily Quest is NOT completed:</B>
+    If Daily Quest is NOT completed:
 
-- Streak resets to 0
+        - Streak resets to 0
 
-- Tomorrow shows the same Daily Quest
+        - Tomorrow shows the same Daily Quest
 
-This creates:
+    This creates:
 
-- Soft pressure
+        - Soft pressure
 
-- No punishment
+        - No punishment
 
-- Psychological continuity
+        - Psychological continuity
+
+#### <B>Updated and Current -</B>
+
+- If the Player completes the Focus Pool and the Reinforcement Pool, the Session updates immedietly.
+- The Player can complete any number of Sessions in one day.
+- If the Player completes only one Session in one day then, the Streak increments by one.
+- If the Player completes more than two Sessions in one day then, the Freeze Streak increments by one. 
+    - The Freeze Streak, freezes the Streak count if, the Player missed to complete at least one Session in one day.
+    - The Player can have at most five Freeze Streak.
+    - The Freeze Streak cannot be used if, the Player misses more than two consecutive days. This esures that, even if you have some Freeze Streak, you are not allowed to miss more than two consecutive days. 
+- If the Player is on his third consecutive missed day then, even if having the Freeze Streak, the Streak count will be reset to zero.
+- If the Player is on his first or on the second consecutive missed day and the Freeze Streak count is zero then, the Streak count will be reset to zero. 
 
 ------------------------------------------------------
 
@@ -627,3 +651,37 @@ A ConceptNode is visible to a user if and only if its parent MainQuest is visibl
 """
 
 <b>Hence, the two Visibility Functions are working as expected.</b>
+
+----------------------------------------------------
+<br>
+
+## ----------Session Derivation Functions
+
+### 6) What must be the Current Action of the User ? [get_focus_pool(user)]
+
+#### Responsibility
+
+- Return the single ConceptNode that the user should focus on right now.
+
+#### Definition
+
+- The Focus Pool contains exactly one ConceptNode:
+the pending ConceptNode of the user.
+
+- Input:
+
+    - user (Django User instance)
+
+- Output:
+
+    - ConceptNode instance OR
+
+    - None (if no pending ConceptNode exists)
+
+#### Applying the get_focus_pool function on the Dummy Data
+
+- We know that, the "user1 = test1" has completed only the MQ1_CN1, which mean, the get_focus_pool should return MQ1_CN2.
+
+- For the "user2 = Tanmay" who completed all the three ConceptNodes of the MQ1, the get_focus_pool should return the MQ2_CN1.
+
+- While the "user3 = test3" who has completed all the ConceptNodes of all the Published MainQuests, the et_focus_pool returns 'None'. 
