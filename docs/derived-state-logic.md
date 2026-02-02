@@ -685,3 +685,51 @@ the pending ConceptNode of the user.
 - For the "user2 = Tanmay" who completed all the three ConceptNodes of the MQ1, the get_focus_pool should return the MQ2_CN1.
 
 - While the "user3 = test3" who has completed all the ConceptNodes of all the Published MainQuests, the et_focus_pool returns 'None'. 
+
+<br>
+
+### 7) Which ConceptNodes the user should Reinforce Now ? [get_reinforcement_pool(user)]
+
+#### Purpose
+
+- Return a reinforcement pool of exactly 4 ConceptNodes, designed to reinforce prior learning while the user works on the current Session.
+
+#### ConceptNode eligibility
+
+- A ConceptNode is eligible iff:
+
+    - It is completed by the user, which also means it's MainQuest is published, and
+    - It belongs to:
+        - the current MainQuest, or
+        - a previously completed MainQuest
+
+#### Pool size rule
+- If the user has fewer than 6 completed ConceptNodes total →
+return an empty QuerySet.
+
+#### Sampling Rules (VERY IMPORTANT)
+
+- When eligible nodes ≥ 6:
+    - Select exactly two distinct MainQuests
+
+    - One may be the current MainQuest
+
+    - Both may be completed MainQuests
+
+- From each selected MainQuest, randomly select:
+    - 2 completed ConceptNodes
+
+- Total reinforcement pool size = 4
+
+#### Return type
+
+- A list of exactly 4 ConceptNode objects OR an empty list ([]) if conditions are not met
+
+- List, not QuerySet — because:
+    - ordering is irrelevant
+
+#### Applying the get_reinforcement_pool(user) on the Dummy Data
+
+- We know that, the "user1=test1" has completed only the MQ1_CN1, and his focus pool is the MQ1_CN2 so, the reinforcement pool is [].
+- The "user2=Tanmay" has completed all the three nodes of the MQ1 and his focus pool is the MQ2_CN1 and hence, the reinforcement pool is [].
+- The "user3=test3" has completed all the nodes of all the published MainQuests and his focus pool is None and because he completed at least two MainQuests, his reinforcement pool is non-empty list.

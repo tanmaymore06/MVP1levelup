@@ -1,5 +1,7 @@
 from quests.models import ConceptNode, MainQuest
 from progress.models import UserNodeProgress
+import random
+from collections import defaultdict
 
 
 def get_completed_nodes(user):
@@ -124,3 +126,48 @@ def get_focus_pool(user):
     Returns None if there is no pending ConceptNode.
     """
     return get_pending_node(user)
+
+
+def get_reinforcement_pool(user):
+    """ 
+    Returns the Reinforcement Pool for the user.
+
+    The Reinforcement Pool consists of exactly 4 completed ConceptNodes,
+    sampled as 2 nodes from each of 2 different MainQuests.
+
+    Returns an empty list if the pool cannot be constructed.
+    """
+    completed_nodes = get_completed_nodes(user)
+    if completed_nodes.count() < 6:
+        return []  # Not enough completed nodes to form the pool
+    
+    # Group completed nodes by their MainQuest
+    nodes_by_main_quest = defaultdict(list)
+    for node in completed_nodes:
+        nodes_by_main_quest[node.main_quest].append(node)
+    
+    eligible_main_quests = { 
+    mq: nodes 
+    for mq, nodes in nodes_by_main_quest.items() 
+    if len(nodes) >= 2
+    }
+
+    if len(eligible_main_quests) < 2:
+        return [] 
+    
+    selected_main_quests = random.sample(
+    list(eligible_main_quests.keys()), 2
+    )
+
+    reinforcement_nodes = []
+
+    for mq in selected_main_quests:
+        reinforcement_nodes.extend(
+            random.sample(eligible_main_quests[mq], 2) 
+    )
+    
+    if len(reinforcement_nodes) != 4:
+        return []
+    
+    return reinforcement_nodes
+
