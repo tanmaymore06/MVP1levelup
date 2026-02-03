@@ -5,6 +5,7 @@ class MainQuest(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     order = models.PositiveIntegerField(unique=True)
+    is_published = models.BooleanField(default=False)
 
     class Meta: # Ensures MainQuests are ordered by 'order' field by default
         ordering = ['order']
