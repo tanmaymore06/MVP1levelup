@@ -277,7 +277,7 @@ A list of ConceptNodes:
 - Never includes non-visible nodes
 
 - Size of the Reinforcement Pool will always be four.
-- Size of the Reinforcement Poo is static.
+- Size of the Reinforcement Pool is static.
     - <B>[Earlier]</B> Size also depends on completion ratio
 - Links to written explanations
 
@@ -733,3 +733,11 @@ return an empty QuerySet.
 - We know that, the "user1=test1" has completed only the MQ1_CN1, and his focus pool is the MQ1_CN2 so, the reinforcement pool is [].
 - The "user2=Tanmay" has completed all the three nodes of the MQ1 and his focus pool is the MQ2_CN1 and hence, the reinforcement pool is [].
 - The "user3=test3" has completed all the nodes of all the published MainQuests and his focus pool is None and because he completed at least two MainQuests, his reinforcement pool is non-empty list.
+
+<br>
+
+### 8) The Current Session of the User ? [get_session(user)]
+
+<B>A Session is a dictionary which consists of - 
+- The Focus Pool : One pending ConceptNode,
+- The Reinforcement Pool : A List of four Random Completed ConceptNodes.</B>

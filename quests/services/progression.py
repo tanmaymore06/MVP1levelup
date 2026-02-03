@@ -171,3 +171,18 @@ def get_reinforcement_pool(user):
     
     return reinforcement_nodes
 
+def get_session(user):
+    """ 
+    Returns the current session for the user
+    
+    A session consists of:
+    - The Focus Pool (a single pending ConceptNode or None)
+    - The Reinforcement Pool (a list of 4 completed ConceptNodes or empty list)
+    """
+    focus_node = get_focus_pool(user)
+    reinforcement_nodes = get_reinforcement_pool(user)
+
+    return {
+        "focus_pool": focus_node,
+        "reinforcement_pool": reinforcement_nodes
+    }
