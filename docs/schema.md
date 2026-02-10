@@ -10,10 +10,12 @@
   - Represents a Markdown-backed reading page
 - <B>UserNodeProgress</B>
   - Records that a user has completed a ConceptNode
+- <B>SessionCompletion</B>
+  - Records that a user has completed a Session(Focus + Reinforcement)
 
 ## Entity-Relationship Model
 <figure> 
-<img src="Database Schema of the Level Up (the 1st MVP).jpeg">
+<img src="Database Schema (1st MVP).jpeg">
 </figure>
 
 ## Relationship Explanations
@@ -27,7 +29,50 @@
 
     <B>Why UserNodeProgress exists</B>:
     To record the fact “User X has completed Concept Node Y”.
+---------------------------
+
+- <B>User ↔ SessionCompletion</B>
+
+    <B>Relationship type</B>: One-to-Many
+
+    <B>Meaning</B>:
+    A user can complete multiple learning Sessions,
+    and each SessionCompletion belongs to exactly one user.
+
+    <B>What SessionCompletion represents</B>:
+    A SessionCompletion records a single completed learning Session,
+    consisting of:
+    - one Focus ConceptNode, and
+    - zero or more Reinforcement ConceptNodes.
+
+    <B>Important distinction</B>:
+    SessionCompletion records <U>what the user worked on</U>,
+    not <U>what the user has completed</U>.
 ----------------------------
+
+- <B>SessionCompletion ↔ ConceptNode</B>
+
+    <B>Relationship type</B>:
+    - Many-to-One (Focus ConceptNode)
+    - Many-to-Many (Reinforcement ConceptNodes)
+
+    <B>Meaning</B>:
+    Each SessionCompletion:
+    - focuses on exactly one ConceptNode (the pending node), and
+    - may reinforce multiple previously completed ConceptNodes.
+
+    <B>Why this relationship exists</B>:
+    Learning Sessions are experiential.
+    A user may revisit completed concepts for reinforcement
+    without changing their completion state.
+
+    <B>What this does NOT imply</B>:
+    A ConceptNode appearing in a SessionCompletion
+    does not mean it is newly completed.
+    Completion state is recorded only in <B>UserNodeProgress</B>.
+----------------------------
+
+
 - <B>MainQuest → ConceptNode</B>
 
     <B>Relationship type</B>: One-to-Many
@@ -38,6 +83,8 @@
     <B>Why this relationship exists</B>:
     Main Quests group nodes into logical chapters and define progression order.
 -------------------------------
+
+
 - <B>ConceptNode → ConceptNodePage</B>
 
     <B>Relationship type</B>: One-to-Many
@@ -61,12 +108,14 @@
 
 ## Design Principles
 
-- Only irreversible user actions are stored.
+- Only two irreversible user actions are stored, which are:
+  - SessionCompletion stores immutable learning events (Sessions), while UserNodeProgress stores irreversible progression state.
 - Everything else is derived i.e., computed at runtime. For example, 
     - <B>All learning states are derived</B> (e.g., "pending node", "completed node", "visible node", "non-visible node"), 
     - <B>Unlocking Logic</B>: A Concept Node and also a Main Quest is unlock if and only if, all the previous nodes are <U>"completed"</U>, and
-    - <B>Daily Quest</B>: All the nodes in the Daily Quest are derived based state of a node.
+    - <B>Session</B>: All the nodes in the Session are derived based on state of a node.
 - Content rendering is frontend responsibility.
+
 
 -------------------------------------------------
 
@@ -95,7 +144,7 @@ Backend treats content as opaque text.
 
 1. What is the user's pending ConceptNode?
 2. Which ConceptNodes are visible to the user?
-3. What is today's Daily Quest?
+3. What is today's Session?
 4. How many nodes are completed in the current MainQuest?
 5. Can the user mark this node as completed?
 <B>and many such questions...</B>
