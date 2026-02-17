@@ -1,5 +1,5 @@
 from django.utils import timezone
-from progress.models import SessionCompletion
+from progress.models import *
 from quests.services.progression import get_session
 
 
@@ -22,5 +22,12 @@ def complete_session(user):
 
     if reinforcement_nodes:
         session_completion.reinforcement_nodes.add(*reinforcement_nodes)
+
+    # Advance user progression: complete the focus ConceptNode if not already completed
+    UserNodeProgress.objects.get_or_create(
+        user=user,
+        concept_node=focus_node,
+        completed_at=timezone.now(),
+    )
 
     return session_completion
