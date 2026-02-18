@@ -71,3 +71,36 @@ class SessionCompletion(models.Model):
     
     def __str__(self):
         return f"{self.user.username} completed a session focused on {self.focus_node.title} at {self.completed_at}"
+
+
+class UserStreakState(models.Model):
+    """
+    Cached engagement state for a user.
+
+    This model stores derived streak-related values to support
+    lazy evaluation of streak logic without cron jobs.
+    """
+
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name="streak_state"
+    )
+
+    streak = models.PositiveIntegerField(default=0)
+    freeze_streak = models.PositiveIntegerField(default=0)
+    consecutive_zero_session_days = models.PositiveIntegerField(default=0)
+
+    last_evaluated_date = models.DateField(
+        help_text="Last calendar date for which streak logic was evaluated"
+    )
+
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return (
+            f"{self.user.username} | "
+            f"streak={self.streak}, "
+            f"freeze={self.freeze_streak}"
+        )
+    

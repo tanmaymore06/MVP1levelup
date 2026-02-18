@@ -12,6 +12,8 @@
   - Records that a user has completed a ConceptNode
 - <B>SessionCompletion</B>
   - Records that a user has completed a Session(Focus + Reinforcement)
+- <B>UserStreakState</B>
+  - Tracks the Streak state of the user
 
 ## Entity-Relationship Model
 <figure> 
@@ -48,6 +50,14 @@
     <B>Important distinction</B>:
     SessionCompletion records <U>what the user worked on</U>,
     not <U>what the user has completed</U>.
+----------------------------
+
+- <B>User ↔ UserStreakState</B>
+    <B>Relationship type</B>: One-to-One
+
+    <B>Meaning</B>:
+    It has the fields such as, streak, freeze streak, last_evaluated_date,...which tracks the Streak and Freeze Streak states.
+
 ----------------------------
 
 - <B>SessionCompletion ↔ ConceptNode</B>
