@@ -39,7 +39,7 @@ def complete_session(user):
 def evaluate_streak_if_needed(user):
     today = timezone.localdate()
 
-    streak_state, created = UserStreakState.objects.get_or_create(
+    streak_state = UserStreakState.objects.get_or_create(
         user=user,
         defaults={
             "streak": 0,
@@ -74,8 +74,7 @@ def evaluate_streak_if_needed(user):
                     streak_state.freeze_streak + 1,
                     5
                 )
-            print("Evaluating date:", current_date)
-            print("Session count:", session_count)
+            
 
         # Case B: User completed zero sessions
         else:
