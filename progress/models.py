@@ -67,7 +67,7 @@ class SessionCompletion(models.Model):
 
     class Meta:
         ordering = ["-completed_at"]
-        unique_together = ("user", "calendar_date", "completed_at")
+        unique_together = ("user", "focus_node")
     
     def __str__(self):
         return f"{self.user.username} completed a session focused on {self.focus_node.title} at {self.completed_at}"
