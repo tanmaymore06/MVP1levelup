@@ -1,28 +1,42 @@
 # Functions To Execute After a Player Completes a Session
 
 ## 1) complete_session(user)
-### This function persist what the user actually completed in a Session in the 'SessionCompletion' model and then advances the progression by recording in the UserNodeProgress.
+### Purpose:
+The complete_session(user) function records that a user has successfully completed a learning session.
+- A session consists of:
+    - 1 Focus ConceptNode
+    - 0–4 Reinforcement ConceptNodes
 
-#### Algorithm:
-1. Gets the session of the user, using the get_session(user) which is already documented in the derived-state-logic markdown,
-2. Extracts the focus node and the reinforcement nodes (if any reinforcement nodes exists),
-3. Record in the SessionCompletion model,
-4. Advance progression by recording the focus node in the UserNodeProgress, and   
-5. Return the record of the SessionCompletion.
+The function validates that the session is legitimate before recording it in the database.
 
+### Preconditions
 
-## How Backend Can Know A Session is truly Completed Or Not ?
+- The function assumes the following conditions:
+    1) A session has already been generated for the user via get_session(user).
+    2) The Focus ConceptNode must be completed by the user before the session can be recorded.
+    3) Reinforcement nodes come from previously completed ConceptNodes.
 
-A Session is complete if and only if:
-- The user finishes the last ConceptNodePage of the focus node
-- The user completes all required reinforcement ConceptNodes
-- The frontend explicitly signals completion to the backend
+If the Focus ConceptNode is not completed, the session will not be recorded.
 
-The flow is like:
-- Frontend calls the "get_session(user)", the backend response with the required data in the JSON form, and then the frontend renders it
-- The frontend knows how user is moving page by page, whether the user completes the last page,etc., In short, the frontend knows when the ConceptNode is completed or not
-- If the frontend comes to know a user has completed all the nodes including the focus and reinforcement in a Session then, calls the "complete_session(user)"
-- The backend gets the current Session, records it in the SessionCompletion model and marks the Focus/Pending node completed in the UserNodeProgess model leaving the reinforcement nodes untouched (because they're already completed historically), and makes the next Session available immedietly
+### High Level Workflow
+
+- The function performs the following steps:
+    1. Retrieve the user's current session using get_session(user)
+    2. Extract:
+        - focus_node
+        - reinforcement_nodes
+    3. Validate that the focus_node is completed
+   using UserNodeProgress
+    4. Record the session in SessionCompletion
+    5. Attach reinforcement nodes to the session    
+    6. Return the created SessionCompletion record
+
+### Validation Logic
+
+- Before recording the session, the backend verifies that the focus node is actually completed by the user
+- If the focus node is not completed, the backend raises the ValueError("Focus ConceptNode is not completed yet.").
+- This prevents the frontend or malicious clients from recording fake sessions.
+
 
 
 ## 2) Evaluating Streak [evaluate_streak_if_needed(user)]

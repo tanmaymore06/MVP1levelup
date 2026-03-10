@@ -1,4 +1,5 @@
 from django.utils import timezone
+from django.db import IntegrityError
 from datetime import timedelta
 from progress.models import *
 from quests.services.progression import get_session
@@ -14,14 +15,27 @@ def complete_session(user):
     focus_node = session["focus_node"]
     reinforcement_nodes = session.get("reinforcement_nodes", [])
 
-    session_completion = SessionCompletion.objects.create(
+    # Validate that the focus ConceptNode has been completed before recording the session completion
+    focus_completed = UserNodeProgress.objects.filter(
+        user=user,
+        concept_node=focus_node
+    ).exists()
+
+    if not focus_completed:
+        raise ValueError("Focus ConceptNode is not completed yet.")
+
+    # try to create a new SessionCompletion record, ensuring that the same focus node is not recorded multiple times for the same user
+    try:
+        session_completion = SessionCompletion.objects.create(
         user=user,
         focus_node=focus_node,
         completed_at=timezone.now(),
         calendar_date=timezone.localdate(),
     )
+    except IntegrityError:
+        raise ValueError("Session for this focus node already recorded.")
 
-    if reinforcement_nodes:
+    if reinforcement_nodes: 
         session_completion.reinforcement_nodes.add(*reinforcement_nodes)
 
     # Advance user progression: complete the focus ConceptNode if not already completed
