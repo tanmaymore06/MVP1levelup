@@ -183,6 +183,6 @@ def get_session(user):
     reinforcement_nodes = get_reinforcement_pool(user)
 
     return {
-        "focus_pool": focus_node,
-        "reinforcement_pool": reinforcement_nodes
+        "focus_node": focus_node,
+        "reinforcement_nodes": reinforcement_nodes
     }

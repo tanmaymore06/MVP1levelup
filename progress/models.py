@@ -6,6 +6,12 @@ from quests.models import ConceptNode
 
 
 class UserNodeProgress(models.Model):
+    """
+    This model tracks the progress of a user.
+    Each time a user completes a Pending ConceptNode, a new record is created
+    which stores the user, the completed ConceptNode, and 
+    the date and time of completion.
+    """
     user = models.ForeignKey( 
         User,
         on_delete=models.CASCADE,
@@ -28,3 +34,73 @@ class UserNodeProgress(models.Model):
 
     def __str__(self):
         return f"{self.user.username} completed the Concept Node {self.concept_node.title} at {self.completed_at}"
+
+
+
+class SessionCompletion(models.Model):
+    """  
+    This model tracks the completion of a session by a user.
+    Each time a user completes a session, a new record is created 
+    which stores the user, completed Focus Node and Reinforcement Nodes (if any reinforcement nodes were completed), and
+    the date, time and day of completion.
+    """
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="session_completions",
+    )
+
+    focus_node = models.ForeignKey(
+        ConceptNode,
+        on_delete=models.PROTECT,
+        related_name="focused_in_sessions",
+    )
+
+    reinforcement_nodes = models.ManyToManyField(
+        ConceptNode,
+        related_name="reinforced_in_sessions",
+        blank=True,
+    )
+
+    completed_at = models.DateTimeField(auto_now_add=True)
+    calendar_date = models.DateField()
+
+    class Meta:
+        ordering = ["-completed_at"]
+        unique_together = ("user", "focus_node")
+    
+    def __str__(self):
+        return f"{self.user.username} completed a session focused on {self.focus_node.title} at {self.completed_at}"
+
+
+class UserStreakState(models.Model):
+    """
+    Cached engagement state for a user.
+
+    This model stores derived streak-related values to support
+    lazy evaluation of streak logic without cron jobs.
+    """
+
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name="streak_state"
+    )
+
+    streak = models.PositiveIntegerField(default=0)
+    freeze_streak = models.PositiveIntegerField(default=0)
+    consecutive_zero_session_days = models.PositiveIntegerField(default=0)
+
+    last_evaluated_date = models.DateField(
+        help_text="Last calendar date for which streak logic was evaluated"
+    )
+
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return (
+            f"{self.user.username} | "
+            f"streak={self.streak}, "
+            f"freeze={self.freeze_streak}"
+        )
+    
