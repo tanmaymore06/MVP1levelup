@@ -3,6 +3,28 @@ from django.db import models
 # Create your models here.
 from django.contrib.auth.models import User # Using Django's built-in User model
 from quests.models import ConceptNode
+from content.models import ConceptNodePage
+
+
+class UserPageProgress(models.Model):
+    '''This model tracks the progress of a user on a specific ConceptNodePage.'''
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    page = models.ForeignKey(
+        ConceptNodePage,
+        on_delete=models.CASCADE
+    )
+
+    completed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "page"],
+                name="unique_user_page_progress"
+            )
+        ]
 
 
 class UserNodeProgress(models.Model):

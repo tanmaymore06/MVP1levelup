@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import UserNodeProgress, SessionCompletion, UserStreakState
+from .models import UserPageProgress, UserNodeProgress, SessionCompletion, UserStreakState
 
 admin.site.register(UserNodeProgress)
 
@@ -22,3 +22,5 @@ class UserStreakStateAdmin(admin.ModelAdmin):
         "updated_at",
     )
     readonly_fields = ("updated_at",)
+
+admin.site.register(UserPageProgress)
