@@ -5,6 +5,9 @@ from quests.models import ConceptNode
 
 
 class ConceptNodePage(models.Model):
+    '''This model represents a page of content associated with a ConceptNode. 
+    Each ConceptNode can have multiple pages, and each page has an order to determine its sequence within the ConceptNode.'''
+
     concept_node = models.ForeignKey( 
         ConceptNode,
         on_delete=models.CASCADE,

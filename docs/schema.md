@@ -8,6 +8,8 @@
   - Represents a single mathematical concept
 - <B>ConceptNodePage</B>
   - Represents a Markdown-backed reading page
+- <B>UserPageProgress</B>
+  - Records that a user has completed a ConceptNodePage
 - <B>UserNodeProgress</B>
   - Records that a user has completed a ConceptNode
 - <B>SessionCompletion</B>
@@ -104,6 +106,54 @@
 
     <B>Why this relationship exists</B>:
     To support multi-page learning with sequential navigation.
+---------
+
+- <B>ConceptNodePage ↔ UserPageProgress</B>
+
+    - <B>Relationship type:</B> One-to-Many
+
+    - <B>Meaning</B>:
+    A ConceptNodePage can be completed by many users, and each UserPageProgress record belongs to exactly one user and one page.
+  
+    - <B>Why UserPageProgress exists</B>:
+    To record the fact "User X has completed Page Y".
+
+    - <B>Why page-level progress is necessary</B>:
+    ConceptNodes consist of multiple ordered pages.
+    Tracking progress only at the node level would make it impossible to:
+
+      - resume learning from the correct page
+
+      - enforce sequential page reading
+
+      - measure partial progress inside a node
+
+      UserPageProgress enables fine-grained progress tracking within a ConceptNode.
+
+    - <B>Relationship with ConceptNode</B>:
+
+      - Page completion contributes to node completion through the following hierarchy
+        User
+          ↓
+        UserPageProgress
+          ↓
+        ConceptNodePage
+          ↓
+        ConceptNode
+          ↓
+        UserNodeProgress
+
+    - A ConceptNode is considered completed only when all its pages are completed.
+    - At that point, the system may create a corresponding UserNodeProgress record.
+
+    - Important distinction:
+      - UserPageProgress records page-level completion
+      - UserNodeProgress records concept-level completion
+    - This separation allows the system to support:
+      - incremental learning
+      - multi-page concepts
+      - precise progress tracking.
+
 ---------
 
 - <B>ConceptNode → UserNodeProgress</B>

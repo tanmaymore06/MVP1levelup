@@ -38,13 +38,6 @@ def complete_session(user):
     if reinforcement_nodes: 
         session_completion.reinforcement_nodes.add(*reinforcement_nodes)
 
-    # Advance user progression: complete the focus ConceptNode if not already completed
-    UserNodeProgress.objects.get_or_create(
-        user=user,
-        concept_node=focus_node,
-        completed_at=timezone.now(),
-    )
-
     return session_completion
 
 
@@ -53,7 +46,7 @@ def complete_session(user):
 def evaluate_streak_if_needed(user):
     today = timezone.localdate()
 
-    streak_state = UserStreakState.objects.get_or_create(
+    streak_state, created = UserStreakState.objects.get_or_create( # The 'created' flag is not used here, but it ensures we have a streak state to work with. In sort, it initializes the streak state for new users.
         user=user,
         defaults={
             "streak": 0,
