@@ -20,7 +20,7 @@ def complete_page(user, page_id):
     page = ConceptNodePage.objects.select_related("concept_node").get(id=page_id)
 
     # Prevent duplicate completion
-    progress, created = UserPageProgress.objects.get_or_create(
+    progress, created = UserPageProgress.objects.get_or_create( # The 'progress' variable is not used here, but it ensures we have a progress record to work with. In sort, it initializes the progress for new pages.
         user=user,
         page=page,
         defaults={"completed_at": timezone.now()}
