@@ -22,7 +22,7 @@ from quests.services.progression import (
 
 
 class VisibleMainQuestListView(APIView):
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]   Already set globally in config/settings.py
 
     def get(self, request):
         user = request.user
@@ -42,7 +42,7 @@ class VisibleMainQuestListView(APIView):
 
 
 class ConceptNodeListView(APIView):
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]       Already set globally in config/settings.py
 
     def get(self, request, quest_id):
         user = request.user
@@ -73,7 +73,7 @@ class ConceptNodeListView(APIView):
 
 
 class ConceptNodePageListView(APIView):
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]     Already set globally in config/settings.py
 
     def get(self, request, node_id):
         try:
