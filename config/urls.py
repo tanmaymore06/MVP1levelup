@@ -21,4 +21,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("api/", include("quests.urls")), # include the quests app URLs under the /api/ path
     path("api/", include("accounts.urls")),
+    path("api/", include("progress.urls")),
 ]
