@@ -29,7 +29,8 @@ def complete_page(user, page_id):
     if not created:
         return {
             "status": "already_completed",
-            "node_completed": False
+            "node_completed": False,
+            "concept_node_id": page.concept_node.id
         }
 
     concept_node = page.concept_node
