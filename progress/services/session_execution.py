@@ -15,6 +15,10 @@ def complete_session(user):
     focus_node = session["focus_node"]
     reinforcement_nodes = session.get("reinforcement_nodes", [])
 
+    # Guard against no active session
+    if focus_node is None:
+        raise ValueError("No active session — all quests completed.")
+
     # Validate that the focus ConceptNode has been completed before recording the session completion
     focus_completed = UserNodeProgress.objects.filter(
         user=user,
