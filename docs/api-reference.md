@@ -330,7 +330,10 @@ POST /api/session/complete/
 ```
 **Authentication required:** Yes
 
-**Request body:** None
+**Request body example:**
+{
+    "focus_node_id": 8
+}
 
 **Description:**
 Records the current session as completed and immediately returns a new session.

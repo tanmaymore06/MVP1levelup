@@ -35,11 +35,19 @@ class SessionView(APIView):
 
 
 class CompleteSessionView(APIView):
-    '''API view to mark the user's current Session as completed'''
+    '''API view to mark the user's current session as completed. Expects the focus node ID in the request data.'''
 
     def post(self, request):
+        focus_node_id = request.data.get("focus_node_id")
+
+        if not focus_node_id:
+            return Response(
+                {"detail": "focus_node_id is required."},
+                status=400
+            )
+
         try:
-            complete_session(request.user)
+            complete_session(request.user, focus_node_id)
         except ValueError as e:
             return Response({"detail": str(e)}, status=400)
 
