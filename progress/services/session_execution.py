@@ -5,21 +5,19 @@ from progress.models import *
 from quests.services.progression import get_session
 
 
-def complete_session(user):
+def complete_session(user, focus_node_id):
     """
     Records the completion of the user's current Session.
-    Persists the Focus ConceptNode and Reinforcement ConceptNodes (if any).
+    focus_node_id: the ID of the ConceptNode the user just completed.
     """
-    session = get_session(user)
-
-    focus_node = session["focus_node"]
-    reinforcement_nodes = session.get("reinforcement_nodes", [])
-
-    # Guard against no active session
-    if focus_node is None:
+    if focus_node_id is None:
         raise ValueError("No active session — all quests completed.")
 
-    # Validate that the focus ConceptNode has been completed before recording the session completion
+    try:
+        focus_node = ConceptNode.objects.get(id=focus_node_id)
+    except ConceptNode.DoesNotExist:
+        raise ValueError("Focus ConceptNode does not exist.")
+
     focus_completed = UserNodeProgress.objects.filter(
         user=user,
         concept_node=focus_node
@@ -28,18 +26,19 @@ def complete_session(user):
     if not focus_completed:
         raise ValueError("Focus ConceptNode is not completed yet.")
 
-    # try to create a new SessionCompletion record, ensuring that the same focus node is not recorded multiple times for the same user
     try:
         session_completion = SessionCompletion.objects.create(
-        user=user,
-        focus_node=focus_node,
-        completed_at=timezone.now(),
-        calendar_date=timezone.localdate(),
-    )
+            user=user,
+            focus_node=focus_node,
+            completed_at=timezone.now(),
+            calendar_date=timezone.localdate(),
+        )
     except IntegrityError:
         raise ValueError("Session for this focus node already recorded.")
 
-    if reinforcement_nodes: 
+    reinforcement_nodes = get_session(user).get("reinforcement_nodes", [])
+
+    if reinforcement_nodes:
         session_completion.reinforcement_nodes.add(*reinforcement_nodes)
 
     return session_completion
