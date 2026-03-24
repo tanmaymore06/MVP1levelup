@@ -469,23 +469,37 @@ This endpoint also triggers streak evaluation — always call it on Dashboard lo
 ```
 1. User opens app
         ↓
-2. GET /api/session/
-   → show focus node and reinforcement nodes
+2. GET /api/quests/          → show MainQuest structure
+   GET /api/session/         → show session in sidebar
         ↓
-3. User clicks a ConceptNode
-        ↓
-4. GET /api/nodes/<node_id>/pages/
-   → show first page
-        ↓
+3. User has two paths to progress:
+
+   PATH A — via MainQuest structure:        PATH B — via Session sidebar:
+   Click a visible MainQuest                Click the Focus Node directly
+        ↓                                        ↓
+4. GET /api/quests/<quest_id>/nodes/        GET /api/nodes/<node_id>/pages/
+   → show ConceptNodes with their states    → show first page
+        ↓                                        ↓
+   User clicks the pending ConceptNode           ↓
+        ↓                                        ↓
+   GET /api/nodes/<node_id>/pages/               ↓
+   → show first page                             ↓
+        ↓                                        ↓
+         ----------------both lead here----------
+                            ↓
 5. User clicks Next on each page
         ↓
 6. POST /api/pages/<page_id>/complete/   (on every Next click)
    → if node_completed: true → enable "Finish Session" button
         ↓
+   User may optionally re-visit Reinforcement Nodes from the Session sidebar
+   (completed nodes — no completion tracking required)
+        ↓
 7. User clicks "Finish Session"
         ↓
 8. POST /api/session/complete/
-   → response is new session → update UI immediately
+    → response is new session → update UI immediately
+    → GET /api/quests/ again → update MainQuest structure
         ↓
 9. User opens Dashboard
         ↓
