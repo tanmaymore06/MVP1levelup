@@ -1,6 +1,6 @@
 # Level Up
 
-> *A mathematics learning system where progression is earned, not given.*
+> *A Gamified Math Educational Platform*
 
 ---
 
