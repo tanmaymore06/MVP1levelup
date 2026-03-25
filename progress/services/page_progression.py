@@ -3,7 +3,7 @@ from django.db import transaction
 
 from content.models import ConceptNodePage
 from progress.models import  UserPageProgress, UserNodeProgress
-
+from rest_framework.exceptions import NotFound
 
 @transaction.atomic
 def complete_page(user, page_id):
@@ -17,7 +17,10 @@ def complete_page(user, page_id):
     4. If yes, create UserNodeProgress.
     """
 
-    page = ConceptNodePage.objects.select_related("concept_node").get(id=page_id)
+    try:
+        page = ConceptNodePage.objects.select_related("concept_node").get(id=page_id)
+    except ConceptNodePage.DoesNotExist:
+        raise NotFound("Page not found.")
 
     # Prevent duplicate completion
     progress, created = UserPageProgress.objects.get_or_create( # The 'progress' variable is not used here, but it ensures we have a progress record to work with. In sort, it initializes the progress for new pages.
@@ -29,7 +32,8 @@ def complete_page(user, page_id):
     if not created:
         return {
             "status": "already_completed",
-            "node_completed": False
+            "node_completed": False,
+            "concept_node_id": page.concept_node.id
         }
 
     concept_node = page.concept_node
