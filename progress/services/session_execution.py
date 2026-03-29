@@ -47,10 +47,8 @@ def complete_session(user, focus_node_id):
 
 
 def evaluate_streak_if_needed(user):
-    '''Evaluates and updates the user's streak state if it hasn't been evaluated today.'''
-
+    '''lazy evaluation of user's streak based on their session completions'''
     today = timezone.localdate()
-    yesterday = today - timedelta(days=1)
 
     streak_state, created = UserStreakState.objects.get_or_create(
         user=user,
@@ -62,37 +60,37 @@ def evaluate_streak_if_needed(user):
         }
     )
 
-    # Process all days from last evaluated up to and including today
+    if streak_state.last_evaluated_date == today:   
+        return streak_state
+
     current_date = streak_state.last_evaluated_date + timedelta(days=1)
 
-    while current_date <= today:    
+    while current_date <= today:
         session_count = SessionCompletion.objects.filter(
             user=user,
             calendar_date=current_date
         ).count()
 
-        if session_count >= 1:  # If the user completed at least 1 session on this day, they earn a streak point
+        if session_count >= 1:  
             streak_state.streak += 1
             streak_state.consecutive_zero_session_days = 0
 
-            if session_count > 2:   # If the user has done more than 2 sessions in a day, they earn a freeze streak point
+            if session_count > 2:   # reward users who do more than 2 sessions in a day by increasing their freeze streak
                 streak_state.freeze_streak = min(
                     streak_state.freeze_streak + 1, 5
                 )
-        else:   # No sessions completed on this day, so we may need to break the streak or use a freeze
-            streak_state.consecutive_zero_session_days += 1 
-            if streak_state.consecutive_zero_session_days <= 2: # Allow up to 2 consecutive zero-session days without breaking the streak
-                if streak_state.freeze_streak > 0:  # Use a freeze to avoid breaking the streak
+        else:   
+            streak_state.consecutive_zero_session_days += 1
+            if streak_state.consecutive_zero_session_days <= 2: # allow up to 2 days of zero sessions without breaking the streak, but consume a freeze if available
+                if streak_state.freeze_streak > 0:  # consume a freeze to avoid breaking the streak
                     streak_state.freeze_streak -= 1
-            else:   # More than 2 consecutive zero-session days, streak is broken
+            else:
                 streak_state.streak = 0
                 streak_state.consecutive_zero_session_days = 0
 
         current_date += timedelta(days=1)
 
-    # Only mark yesterday as last evaluated — never today
-    # This ensures today is always re-evaluated on next Dashboard load
-    streak_state.last_evaluated_date = yesterday
+    streak_state.last_evaluated_date = today
     streak_state.save()
 
     return streak_state
